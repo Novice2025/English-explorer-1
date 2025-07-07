@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Explorer - Seu Guia de Vocabulário Interativo</title>
+    <!-- Tailwind CSS CDN para fácil estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter para um visual limpo e moderno -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts - Space Mono para o destaque dos sinônimos -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos personalizados para garantir que a fonte Inter seja aplicada e fornecer um fundo de corpo suave */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Aplicando bg-black com Tailwind, e também um estilo inline direto para máxima sobreposição */
+            @apply bg-black text-gray-100; /* Mantendo text-gray-100 para o corpo geral */
+            min-height: 100vh; /* Garante que o corpo ocupe toda a altura da viewport */
+            display: flex; /* Usa flexbox para centralizar o conteúdo */
+            flex-direction: column; /* Empilha os filhos verticalmente */
+            align-items: center; /* Centraliza o conteúdo horizontalmente */
+            justify-content: flex-start; /* Alinha o conteúdo ao topo inicialmente */
+        }
+        /* Estilo para o contêiner principal de conteúdo */
+        .content-container {
+            /* Alterado para permitir que o conteúdo se estenda por toda a largura da tela */
+            /* Ajustado o padding para telas médias para aumentar a largura utilizável do conteúdo */
+            @apply w-full mx-auto p-4 md:p-4; /* Largura responsiva, centralizado, preenchimento */
+        }
+        /* Estilo para cartões de entrada individuais */
+        .entry-card {
+            background-color: rgba(23, 33, 53, 0.95); /* Fundo transparente mais escuro para os cartões */
+            border-radius: 1.5rem; /* Cantos mais arredondados */
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6); /* Sombra mais pronunciada */
+            backdrop-filter: blur(10px); /* Efeito de desfoque sutil */
+            border: 1px solid rgba(0, 220, 255, 0.3); /* Borda com mais brilho neon */
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transição para hover */
+        }
+        /* Estilo de hover para os cartões de entrada */
+        .entry-card:hover {
+            transform: translateY(-5px); /* Leve levantamento no hover */
+            box-shadow: 0 15px 40px rgba(0, 220, 255, 0.2); /* Sombra com brilho neon no hover */
+        }
+        /* Estilo para o título do termo/expressão */
+        .entry-term {
+            @apply text-3xl md:text-4xl font-bold text-teal-400 mb-4 pb-2 border-b border-gray-700; /* Grande, negrito, cor de destaque, borda inferior */
+        }
+        /* Estilo para subtítulos como Explicação, Tradução, Aplicação */
+        .entry-subtitle {
+            @apply text-xl font-semibold text-gray-300 mt-6 mb-2; /* Medium size, semi-bold, slightly lighter text, margin */
+        }
+        /* Estilo para o texto do corpo dentro das entradas */
+        .entry-text {
+            @apply text-base leading-relaxed text-gray-200; /* Base size, relaxed line height, light text */
+        }
+        /* Estilo para links (se houver) */
+        a {
+            @apply text-teal-300 hover:text-teal-200 transition duration-300;
+        }
+
+        /* Novo estilo para o título principal com gradiente de 3 cores e sombra de brilho */
+        .title-gradient {
+            background-image: linear-gradient(to right, #FF69B4, #FFA500, #39FF14); /* Rosa Choque, Laranja, Verde Neon */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent; /* Necessário para que o gradiente apareça */
+            text-shadow: 0 0 15px rgba(255, 105, 180, 0.6), 0 0 25px rgba(57, 255, 20, 0.6); /* Sombra para o efeito de brilho */
+        }
+
+        /* Estilo text-neon-blue para outros títulos se necessário */
+        .text-neon-blue {
+            color: #00eaff; /* Um azul neon brilhante */
+            text-shadow: 0 0 15px rgba(0, 220, 255, 0.8), 0 0 25px rgba(0, 220, 255, 0.6); /* Sombra mais intensa */
+        }
+
+        /* Estilos para botões de cartão */
+        .card-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0.75rem 1.25rem; /* px-5 py-3 */
+            color: white;
+            font-weight: 600; /* font-semibold */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
+            transition: all 0.3s ease; /* transition-all duration-300 */
+            transform: scale(1); /* transform */
+            text-align: left; /* text-left */
+            /* Remover background-color para usar gradientes */
+        }
+
+        .card-button:hover {
+            transform: scale(1.02); /* hover:scale-102 */
+        }
+
+        .card-button:focus {
+            outline: none; /* focus:outline-none */
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5); /* focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 */
+        }
+
+        /* Estado expandido do conteúdo do cartão */
+        .card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+            padding: 0 1rem; /* Padding inicial zero para transição */
+        }
+
+        .card-content.expanded {
+            max-height: 1200px; /* Aumenta a altura máxima para acomodar mais conteúdo aninhado */
+            padding: 1rem; /* Padding adicionado quando expandido */
+        }
+
+        /* Classes de gradiente para botões e outros elementos */
+        .gradient-blue-purple { background-image: linear-gradient(to right, #6366f1, #a855f7); }
+        .gradient-blue-purple:hover { background-image: linear-gradient(to right, #4f46e5, #9333ea); }
+        .gradient-green-teal { background-image: linear-gradient(to right, #10b981, #14b8a6); }
+        .gradient-green-teal:hover { background-image: linear-gradient(to right, #059669, #0d9488); }
+        .gradient-orange-red { background-image: linear-gradient(to right, #f97316, #ef4444); }
+        .gradient-orange-red:hover { background-image: linear-gradient(to right, #ea580c, #dc2626); }
+        .gradient-pink-purple { background-image: linear-gradient(to right, #ec4899, #d946ef); }
+        .gradient-pink-purple:hover { background-image: linear-gradient(to right, #db2777, #c026d3); }
+        .gradient-yellow-orange { background-image: linear-gradient(to right, #facc15, #f97316); }
+        .gradient-yellow-orange:hover { background-image: linear-gradient(to right, #eab308, #ea580c); }
+        .gradient-cyan-blue { background-image: linear-gradient(to right, #06b6d4, #3b82f6); }
+        .gradient-cyan-blue:hover { background-image: linear-gradient(to right, #0891b2, #2563eb); }
+        .gradient-red-purple { background-image: linear-gradient(to right, #ef4444, #a855f7); }
+        .gradient-red-purple:hover { background-image: linear-gradient(to right, #dc2626, #9333ea); }
+        .gradient-lime-green { background-image: linear-gradient(to right, #84cc16, #22c5ed); } /* Corrigido o erro aqui */
+        .gradient-lime-green:hover { background-image: linear-gradient(to right, #65a30d, #0ea5e9); }
+        .gradient-fuchsia-pink { background-image: linear-gradient(to right, #d946ef, #ec4899); }
+        .gradient-fuchsia-pink:hover { background-image: linear-gradient(to right, #c026d3, #db2777); }
+        .gradient-indigo-red { background-image: linear-gradient(to right, #4f46e5, #ef4444); }
+        .gradient-indigo-red:hover { background-image: linear-gradient(to right, #4338ca, #dc2626); }
+        .gradient-purple-green { background-image: linear-gradient(to right, #8b5cf6, #10b981); }
+        .gradient-purple-green:hover { background-image: linear-gradient(to right, #7c3aed, #059669); }
+        .gradient-teal-pink { background-image: linear-gradient(to right, #14b8a6, #ec4899); }
+        .gradient-teal-pink:hover { background-image: linear-gradient(to right, #0d9488, #db2777); }
+        .gradient-violet-orange { background-image: linear-gradient(to right, #8b008b, #ffa500); }
+        .gradient-violet-orange:hover { background-image: linear-gradient(to right, #6a006a, #e69100); }
+        .gradient-gold-brown { background-image: linear-gradient(to right, #ffd700, #a52a2a); }
+        .gradient-gold-brown:hover { background-image: linear-gradient(to right, #ccac00, #8b1e1e); }
+        .gradient-silver-gray { background-image: linear-gradient(to right, #c0c0c0, #808080); }
+        .gradient-silver-gray:hover { background-image: linear-gradient(to right, #a0a0a0, #606060); }
+        .gradient-aqua-marine { background-image: linear-gradient(to right, #00ffff, #7fffd4); }
+        .gradient-aqua-marine:hover { background-image: linear-gradient(to right, #00cccc, #65e8b7); }
+
+        /* Estilos para o exercício de arrastar e soltar */
+        .draggable {
+            cursor: grab;
+            padding: 0.75rem 1.25rem;
+            background-color: #3b82f6; /* Tailwind blue-500 */
+            color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            text-align: center;
+            margin: 0.5rem; /* Espaçamento entre os itens arrastáveis */
+            display: inline-block; /* Para que fiquem lado a lado */
+        }
+
+        .draggable:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+        }
+
+        .drop-zone {
+            display: inline-block;
+            width: 150px; /* Largura fixa para a zona de soltar */
+            height: 38px; /* Altura para corresponder ao draggable */
+            border: 2px dashed #00eaff; /* Borda tracejada neon */
+            background-color: rgba(0, 220, 255, 0.05); /* Fundo sutil */
+            border-radius: 0.5rem;
+            vertical-align: middle;
+            margin: 0 0.5rem; /* Espaçamento ao redor */
+            text-align: center;
+            line-height: 38px; /* Centraliza o texto verticalmente */
+            color: transparent; /* Esconde o texto original da lacuna */
+        }
+
+        .drop-zone.hover {
+            background-color: rgba(0, 220, 255, 0.2);
+            border-color: #39FF14; /* Muda para verde neon no hover */
+        }
+
+        .drop-zone.filled {
+            border: 2px solid #00eaff; /* Borda sólida quando preenchido */
+            background-color: rgba(0, 220, 255, 0.1);
+            color: white; /* Mostra o texto do item arrastado */
+        }
+
+        .drop-zone.correct {
+            background-color: rgba(57, 255, 20, 0.2); /* Verde neon suave */
+            border-color: #39FF14;
+        }
+
+        .drop-zone.incorrect {
+            background-color: rgba(255, 0, 0, 0.2); /* Vermelho suave */
+            border-color: #FF0000;
+        }
+
+        /* Novo estilo para destaque de sinônimos com alta porcentagem de uso */
+        .synonym-highlight {
+            color: #FFFF33; /* Amarelo neon */
+            font-family: 'Space Mono', monospace; /* Nova fonte */
+            text-shadow: 0 0 8px rgba(255, 255, 51, 0.8), 0 0 15px rgba(255, 255, 51, 0.6); /* Efeito de brilho */
+        }
+
+        /* Estilo para o botão de áudio */
+        .audio-button {
+            background: none;
+            border: none;
+            color: #00eaff; /* Cor neon blue */
+            cursor: pointer;
+            font-size: 1.25rem; /* text-xl */
+            margin-left: 0.5rem;
+            vertical-align: middle;
+            transition: color 0.2s ease;
+        }
+
+        .audio-button:hover {
+            color: #39FF14; /* Verde neon no hover */
+        }
+
+        /* Estilos para as caixas de texto interativas */
+        .interactive-box {
+            /* Alterado de p-4 para p-3 para corresponder ao padding das caixas de cenário */
+            @apply w-full p-3 mt-3 rounded-lg bg-gray-700 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-400;
+            min-height: 200px; /* Altura mínima aumentada para ser mais atrativa */
+            /* Removido resize: vertical para evitar que o usuário redimensione verticalmente */
+            font-size: 1rem; /* Alterado para 1rem para corresponder ao entry-text */
+            line-height: 1.6; /* Melhora o espaçamento da linha */
+        }
+
+        /* Estilo para o botão de verificar resposta */
+        .check-button {
+            @apply bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-6 rounded-lg mt-4 transition duration-300 ease-in-out transform hover:scale-105;
+            box-shadow: 0 4px 15px rgba(0, 220, 255, 0.4); /* Sombra neon */
+        }
+
+        /* Estilo para a mensagem de feedback */
+        .feedback-message {
+            @apply mt-2 text-sm font-semibold;
+        }
+        .feedback-message.positive {
+            @apply text-green-400;
+        }
+        .feedback-message.negative {
+            @apply text-red-400;
+        }
+
+        /* Estilo para a nova seção de dicas de estudo */
+        .study-tips-section {
+            @apply bg-gray-800 p-6 rounded-xl shadow-lg mt-8 border border-gray-700;
+        }
+        .study-tips-section h3 {
+            @apply text-2xl font-bold text-yellow-400 mb-4 text-center;
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+        .study-tips-section ul {
+            @apply list-disc list-inside space-y-3;
+            color: white !important; /* Forçando branco para a lista */
+        }
+        .study-tips-section li {
+            @apply text-base leading-relaxed;
+            color: white !important; /* Forçando branco para os itens da lista */
+        }
+        .study-tips-section li strong {
+            color: white !important; /* Forçando branco para o texto em negrito */
+        }
+
+        /* Estilo para a seção de exercícios */
+        .exercise-section {
+            @apply bg-gray-800 p-6 rounded-xl shadow-lg mt-8 border border-gray-700;
+        }
+        .exercise-section h3 {
+            @apply text-2xl font-bold text-yellow-400 mb-4 text-center;
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+        .word-bank {
+            @apply flex flex-wrap justify-center mb-6 p-4 bg-gray-700 rounded-lg border border-gray-600;
+        }
+        .sentence-item {
+            @apply mb-4 text-lg text-gray-200;
+        }
+        .exercise-feedback {
+            @apply mt-4 text-center text-lg font-semibold;
+        }
+        .exercise-feedback.correct {
+            @apply text-green-400;
+        }
+        .exercise-feedback.incorrect {
+            @apply text-red-400;
+        }
+        .reset-button {
+            @apply bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg mt-4 transition duration-300 ease-in-out transform hover:scale-105;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body style="background-color: #000000;">
+    <div class="content-container">
+        <!-- Cabeçalho do Site -->
+        <header class="text-center py-8">
+            <h1 class="text-5xl font-extrabold mb-2 title-gradient">English Explorer</h1> <!-- Título principal com gradiente -->
+            <p class="text-xl font-semibold text-gray-300 mb-4">Seu Guia de Vocabulário Interativo</p> <!-- Subtítulo atualizado -->
+            <p class="text-lg text-gray-400">Your personal compendium of knowledge.</p>
+
+            <!-- Nova Seção de Dicas de Estudo -->
+            <div class="study-tips-section">
+                <h3>Dicas para Estudar e Aprender as Expressões</h3>
+                <ul>
+                    <li><strong>Ouça e Repita:</strong> Use os botões de áudio para ouvir a pronúncia correta e repita as frases em voz alta. A prática da fala é crucial!</li>
+                    <li><strong>Contextualize:</strong> Sempre tente entender a expressão dentro de um contexto. As "Situações Práticas" são ótimas para isso.</li>
+                    <li><strong>Crie Suas Próprias Frases:</strong> Use as caixas interativas "Try it out!" para criar frases originais com as expressões. Quanto mais você pratica, mais natural se torna.</li>
+                    <li><strong>Pense em Equivalentes:</strong> Ao pensar em como você diria a mesma coisa em português ("Your Portuguese Equivalent"), você fortalece a conexão entre os idiomas e entende a nuance cultural.</li>
+                    <li><strong>Use os Sinônimos:</strong> Explore os sinônimos para expandir seu vocabulário e ter alternativas para diferentes situações. Preste atenção na porcentagem de uso!</li>
+                    <li><strong>Revise Regularmente:</strong> Volte às expressões antigas para refrescar sua memória. A repetição espaçada é chave para a retenção a longo prazo.</li>
+                    <li><strong>Observe no Dia a Dia:</strong> Tente identificar essas expressões em filmes, séries, músicas ou conversas com nativos. Isso ajuda a solidificar o aprendizado.</li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- Área de Conteúdo Principal onde suas entradas irão -->
+        <main id="main-content">
+
+            <!-- Seção: Expressão "Hi buddy" (Agora #1) -->
+            <section class="entry-card">
+                <h2 class="entry-term text-neon-blue">
+                    (1) Hi buddy
+                    <button class="audio-button" data-text="Hi buddy" aria-label="Play audio for Hi buddy">🔊</button>
+                </h2>
+                <p class="entry-text text-gray-400 text-sm mb-4">
+                    <span class="font-bold">Common Usage:</span> Approximately 80% in informal and friendly contexts.
+                </p>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Explicação (English):
+                            <button class="audio-button" data-text="Hi buddy is a very common and informal greeting used to address a friend or acquaintance, particularly among males, but it can also be used by females in a friendly context. Buddy implies a sense of camaraderie and closeness." aria-label="Play audio for English explanation">🔊</button>
+                        </h3>
+                        <p class="entry-text text-gray-300">
+                            "Hi buddy" is a very common and informal greeting used to address a friend or acquaintance, particularly among males, but it can also be used by females in a friendly context. "Buddy" implies a sense of camaraderie and closeness.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Explicação (Português):</h3>
+                        <p class="entry-text text-gray-200">
+                            "Hi buddy" é uma saudação muito comum e informal usada para se dirigir a um amigo ou conhecido, particularmente entre homens, mas também pode ser usada por mulheres em um contexto amigável. "Buddy" implica um senso de camaradagem e proximidade.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Equivalente em Português (como um brasileiro falaria):</h3>
+                        <ul class="list-disc list-inside entry-text pl-4">
+                            <li>"E aí, meu camarada!"</li>
+                            <li>"Fala, amigo!"</li>
+                            <li>"Oi, parceiro!"</li>
+                            <li>"Oi, cara!" (muito informal)</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Situações Práticas (English):
+                            <button class="audio-button" data-text="Scenario 1: Walking into a coffee shop and seeing a friend: 'Hi buddy! Mind if I join you?' Scenario 2: Answering the phone to a close friend: 'Hi buddy! What's up?'" aria-label="Play audio for English practical situations">🔊</button>
+                        </h3>
+                        <div class="space-y-2 entry-text">
+                            <p><strong>Scenario 1:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Walking into a coffee shop and seeing a friend: '<span class="text-teal-300 font-semibold">Hi buddy!</span> Mind if I join you?'"
+                            </p>
+                            <p><strong>Scenario 2:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Answering the phone to a close friend: '<span class="text-teal-300 font-semibold">Hi buddy!</span> What's up?'"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Mesmas Situações (Português com Expressão em Inglês):</h3>
+                        <div class="space-y-2 entry-text">
+                            <p><strong>Scenario 1:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Entrando em uma cafeteria e vendo um amigo: '<span class="text-teal-300 font-semibold">Hi buddy!</span> Posso me juntar a você?'"
+                            </p>
+                            <p><strong>Scenario 2:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Atendendo o telefone para um amigo próximo: '<span class="text-teal-300 font-semibold">Hi buddy!</span> Tudo bem?'"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">My tips to you:</h3>
+                        <p class="entry-text">
+                            <span class="font-bold text-teal-300">Associação:</span> Pense em "buddy" como um sinônimo informal e carinhoso para "friend" ou "pal". É uma forma calorosa de iniciar uma conversa.
+                        </p>
+                        <p class="entry-text mt-2">
+                            <span class="font-bold text-teal-300">Dica:</span> Embora "buddy" seja geralmente amigável, o tom de voz é crucial. Em alguns contextos, pode ser usado de forma sarcástica ou para expressar superioridade, então preste atenção ao contexto e à entonação.
+                        </p>
+                        <p class="entry-text mt-2">
+                            <span class="font-bold text-teal-300">
+                                Advanced Tip (English):
+                                <button class="audio-button" data-text="While buddy is informal, it's generally safe in casual settings. However, in professional or very formal environments, stick to Hello [Name] or Good morning/afternoon [Name] to maintain decorum." aria-label="Play audio for advanced tip">🔊</button>
+                            </span>
+                            While "buddy" is informal, it's generally safe in casual settings. However, in professional or very formal environments, stick to "Hello [Name]" or "Good morning/afternoon [Name]" to maintain decorum.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Sinônimos / Synonyms:
+                            <button class="audio-button" data-text="Hey pal! What's up, man? Hello my friend! Howdy! Alright, mate?" aria-label="Play audio for synonyms">🔊</button>
+                        </h3>
+                        <ul class="list-disc list-inside entry-text pl-4">
+                            <li class="synonym-highlight">Hey pal! <span class="text-gray-400 text-xs">(Common Usage: ~75%)</span></li>
+                            <li class="synonym-highlight">What's up, man? <span class="text-gray-400 text-xs">(Common Usage: ~80% - very common, informal)</span></li>
+                            <li>Hello my friend! <span class="text-gray-400 text-xs">(Common Usage: ~30% - not common among native speakers, can sound formal or slightly unnatural)</span></li>
+                            <li>Howdy! <span class="text-gray-400 text-xs">(Common Usage: ~20% - regional, often Southern US)</span></li>
+                            <li>Alright, mate? <span class="text-gray-400 text-xs">(Common Usage: ~50% - British English informal)</span></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Contextos de Uso:</h3>
+                        <div class="space-y-3 entry-text">
+                            <p>
+                                <span class="font-bold text-teal-300">Chat/Mensagens de Texto:</span> Muito comum em mensagens rápidas entre amigos. É uma forma descontraída e amigável de iniciar a conversa.
+                                <br>Ex: "Hi buddy! Are you free for a call later?"
+                            </p>
+                            <p>
+                                <span class="font-bold text-teal-300">Email:</span> Geralmente evitado em e-mails formais. Use apenas em e-mails muito informais para amigos próximos ou colegas com whom você tem uma relação de longa data e muito casual.
+                                <br>Ex: "Subject: Quick question, buddy!" (para um amigo)
+                            </p>
+                            <p>
+                                <span class="font-bold text-teal-300">Reuniões/Encontros (Informais):</span> Perfeito para cumprimentar amigos em encontros sociais, festas, ou até mesmo em um ambiente de trabalho descontraído onde você tem um relacionamento próximo com a pessoa.
+                                <br>Ex: (Ao encontrar um amigo na rua) "Oh, hey buddy! Didn't expect to see you here!"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-4 border-t border-gray-700">
+                        <h3 class="entry-subtitle">Try it out! (Use the expression in English):</h3>
+                        <textarea class="interactive-box" id="en-box-1" placeholder="Write your sentence using 'Hi buddy' here..."></textarea>
+                        <button class="check-button" onclick="checkAnswer('en-box-1', 'feedback-en-1')">Check Answer</button>
+                        <div id="feedback-en-1" class="feedback-message"></div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Your Portuguese Equivalent (How you'd say it daily):</h3>
+                        <textarea class="interactive-box" id="pt-box-1" placeholder="Write your daily Portuguese equivalent here..."></textarea>
+                        <button class="check-button" onclick="checkAnswer('pt-box-1', 'feedback-pt-1')">Check Answer</button>
+                        <div id="feedback-pt-1" class="feedback-message"></div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Seção: Expressão "Long time no see" (Agora #2) -->
+            <section class="entry-card">
+                <h2 class="entry-term text-neon-blue">
+                    (2) Long time no see
+                    <button class="audio-button" data-text="Long time no see" aria-label="Play audio for Long time no see">🔊</button>
+                </h2>
+                <p class="entry-text text-gray-400 text-sm mb-4">
+                    <span class="font-bold">Common Usage:</span> Approximately 90% in informal settings.
+                </p>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Explicação (English):
+                            <button class="audio-button" data-text="Long time no see is an informal idiomatic expression used to acknowledge a long period of time since two people last met. It's a friendly and casual way to greet someone you haven't seen in a while." aria-label="Play audio for English explanation">🔊</button>
+                        </h3>
+                        <p class="entry-text text-gray-300">
+                            "Long time no see" is an informal idiomatic expression used to acknowledge a long period of time since two people last met. It's a friendly and casual way to greet someone you haven't seen in a while.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Explicação (Português):</h3>
+                        <p class="entry-text text-gray-200">
+                            "Long time no see" é uma expressão idiomática informal usada para reconhecer um longo período de tempo desde a última vez que duas pessoas se encontraram. É uma maneira amigável e casual de cumprimentar alguém que você não vê há um tempo.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Equivalente em Português (como um brasileiro falaria):</h3>
+                        <ul class="list-disc list-inside entry-text pl-4">
+                            <li>"Quanto tempo!"</li>
+                            <li>"Faz tempo que a gente não se vê!"</li>
+                            <li>"Nossa, que saudade!" (se houver uma conexão emocional)</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Situações Práticas (English):
+                            <button class="audio-button" data-text="Scenario 1: Hey, John! Long time no see! How have you been since college? Scenario 2: Is that Sarah? Wow, Long time no see! I didn't expect to run into you at this concert." aria-label="Play audio for English practical situations">🔊</button>
+                        </h3>
+                        <div class="space-y-2 entry-text">
+                            <p><strong>Scenario 1:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Hey, John! <span class="text-teal-300 font-semibold">Long time no see!</span> How have you been since college?"
+                            </p>
+                            <p><strong>Scenario 2:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Is that Sarah? Wow, <span class="text-teal-300 font-semibold">Long time no see!</span> I didn't expect to run into you at this concert."
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Mesmas Situações (Português com Expressão em Inglês):</h3>
+                        <div class="space-y-2 entry-text">
+                            <p><strong>Scenario 1:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "E aí, João! <span class="text-teal-300 font-semibold">Long time no see!</span> Como você tem passado desde a faculdade?"
+                            </p>
+                            <p><strong>Scenario 2:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Aquela é a Sara? Uau, <span class="text-teal-300 font-semibold">Long time no see!</span> Eu não esperava te encontrar neste show."
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">My tips to you:</h3>
+                        <p class="entry-text">
+                            <span class="font-bold text-teal-300">Associação:</span> Imagine dois velhos amigos se esbarrando inesperadamente depois de muitos anos. A primeira coisa que eles provavelmente exclamariam é "Long time no see!"
+                        </p>
+                        <p class="entry-text mt-2">
+                            <span class="font-bold text-teal-300">Dica:</span> Esta frase é muito informal. Use-a com amigos, familiares ou colegas com quem você tem um relacionamento casual. Evite-a em ambientes de negócios formais ou com pessoas que você acabou de conhecer.
+                        </p>
+                        <p class="entry-text mt-2">
+                            <span class="font-bold text-teal-300">
+                                Advanced Tip (English):
+                                <button class="audio-button" data-text="While Long time no see is widely understood, for more formal or polished contexts, consider alternatives like It's been a while or It's good to see you again after all this time. This demonstrates a broader vocabulary and adaptability." aria-label="Play audio for advanced tip">🔊</button>
+                            </span>
+                            While "Long time no see" is widely understood, for more formal or polished contexts, consider alternatives like "It's been a while" or "It's good to see you again after all this time." This demonstrates a broader vocabulary and adaptability.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Sinônimos / Synonyms:
+                            <button class="audio-button" data-text="It's been a while. Haven't seen you in ages. Good to see you again. Where have you been hiding? Long time no talk." aria-label="Play audio for synonyms">🔊</button>
+                        </h3>
+                        <ul class="list-disc list-inside entry-text pl-4">
+                            <li class="synonym-highlight">It's been a while. <span class="text-gray-400 text-xs">(Common Usage: ~85%)</span></li>
+                            <li class="synonym-highlight">Haven't seen you in ages. <span class="text-gray-400 text-xs">(Common Usage: ~70%)</span></li>
+                            <li class="synonym-highlight">Good to see you again. <span class="text-gray-400 text-xs">(Common Usage: ~95% - very common and versatile)</span></li>
+                            <li>Where have you been hiding? <span class="text-gray-400 text-xs">(Common Usage: ~40% - more playful/less common)</span></li>
+                            <li>Long time no talk. <span class="text-gray-400 text-xs">(Common Usage: ~60% - specific to communication)</span></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Contextos de Uso:</h3>
+                        <div class="space-y-3 entry-text">
+                            <p>
+                                <span class="font-bold text-teal-300">Chat/Mensagens de Texto:</span> Perfeito para iniciar uma conversa casual com alguém que você não fala há um tempo. É rápido, informal e expressa um sentimento de reencontro.
+                                <br>Ex: "Hey! Long time no see. How's life treating you?"
+                            </p>
+                            <p>
+                                <span class="font-bold text-teal-300">Email:</span> Adequado para e-mails informais a colegas ou conhecidos com quem você tem um relacionamento amigável. Pode ser usado na linha de assunto ou no início do corpo do e-mail.
+                                <br>Ex: "Subject: Long time no see! Quick question about..."
+                                <br>Ex: "Hi [Name], Long time no see! Hope you're doing well."
+                            </p>
+                            <p>
+                                <span class="font-bold text-teal-300">Reuniões/Encontros (Informais):</span> Ótimo para quebrar o gelo ao encontrar alguém em um evento social, conferência ou até mesmo no escritório, se a cultura for mais descontraída.
+                                <br>Ex: (Ao ver um antigo colega) "Oh, wow, long time no see! I didn't know you'd be here."
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-4 border-t border-gray-700">
+                        <h3 class="entry-subtitle">Try it out! (Use the expression in English):</h3>
+                        <textarea class="interactive-box" id="en-box-2" placeholder="Write your sentence using 'Long time no see' here..."></textarea>
+                        <button class="check-button" onclick="checkAnswer('en-box-2', 'feedback-en-2')">Check Answer</button>
+                        <div id="feedback-en-2" class="feedback-message"></div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Your Portuguese Equivalent (How you'd say it daily):</h3>
+                        <textarea class="interactive-box" id="pt-box-2" placeholder="Write your daily Portuguese equivalent here..."></textarea>
+                        <button class="check-button" onclick="checkAnswer('pt-box-2', 'feedback-pt-2')">Check Answer</button>
+                        <div id="feedback-pt-2" class="feedback-message"></div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Nova Seção: Expressão "Quick question" -->
+            <section class="entry-card">
+                <h2 class="entry-term text-neon-blue">
+                    (3) Quick question
+                    <button class="audio-button" data-text="Quick question" aria-label="Play audio for Quick question">🔊</button>
+                </h2>
+                <p class="entry-text text-gray-400 text-sm mb-4">
+                    <span class="font-bold">Common Usage:</span> Approximately 95% in various contexts (informal to semi-formal).
+                </p>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Explicação (English):
+                            <button class="audio-button" data-text="Quick question is a common and polite way to introduce a brief inquiry or to ask for a small amount of someone's time. It signals that the question won't be lengthy or complicated." aria-label="Play audio for English explanation">🔊</button>
+                        </h3>
+                        <p class="entry-text text-gray-300">
+                            "Quick question" is a common and polite way to introduce a brief inquiry or to ask for a small amount of someone's time. It signals that the question won't be lengthy or complicated.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Explicação (Português):</h3>
+                        <p class="entry-text text-gray-200">
+                            "Quick question" é uma forma comum e educada de introduzir uma pergunta breve ou de pedir um pouco do tempo de alguém. Sinaliza que a pergunta não será longa ou complicada.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Equivalente em Português (como um brasileiro falaria):</h3>
+                        <ul class="list-disc list-inside entry-text pl-4">
+                            <li>"Uma pergunta rápida."</li>
+                            <li>"Só uma perguntinha."</li>
+                            <li>"Posso te fazer uma pergunta rápida?"</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Situações Práticas (English):
+                            <button class="audio-button" data-text="Scenario 1: Approaching a colleague at their desk: 'Hey, do you have a quick question about the report?' Scenario 2: During a presentation, raising your hand: 'Excuse me, I have a quick question regarding the last slide.'" aria-label="Play audio for English practical situations">🔊</button>
+                        </h3>
+                        <div class="space-y-2 entry-text">
+                            <p><strong>Scenario 1:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Approaching a colleague at their desk: 'Hey, do you have a <span class="text-teal-300 font-semibold">quick question</span> about the report?'"
+                            </p>
+                            <p><strong>Scenario 2:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "During a presentation, raising your hand: 'Excuse me, I have a <span class="text-teal-300 font-semibold">quick question</span> regarding the last slide.'"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Mesmas Situações (Português com Expressão em Inglês):</h3>
+                        <div class="space-y-2 entry-text">
+                            <p><strong>Scenario 1:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Aproximando-se de um colega na mesa dele: 'Ei, você tem uma <span class="text-teal-300 font-semibold">quick question</span> sobre o relatório?'"
+                            </p>
+                            <p><strong>Scenario 2:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Durante uma apresentação, levantando a mão: 'Com licença, eu tenho uma <span class="text-teal-300 font-semibold">quick question</span> sobre o último slide.'"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">My tips to you:</h3>
+                        <p class="entry-text">
+                            <span class="font-bold text-teal-300">Associação:</span> Pense em "quick question" como um "aviso" de que sua pergunta será breve. Isso é útil para não interromper ou sobrecarregar a pessoa.
+                        </p>
+                        <p class="entry-text mt-2">
+                            <span class="font-bold text-teal-300">Dica:</span> Use "quick question" para perguntas que realmente são rápidas. Se a pergunta exigir uma discussão longa, é melhor agendar um tempo para conversar.
+                        </p>
+                        <p class="entry-text mt-2">
+                            <span class="font-bold text-teal-300">
+                                Advanced Tip (English):
+                                <button class="audio-button" data-text="While quick question is widely accepted, in highly formal written communication, it's best to rephrase your inquiry directly without this informal preamble." aria-label="Play audio for advanced tip">🔊</button>
+                            </span>
+                            While "quick question" is widely accepted, in highly formal written communication (e.g., academic papers, legal documents), it's best to rephrase your inquiry directly without this informal preamble.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Sinônimos / Synonyms:
+                            <button class="audio-button" data-text="Brief inquiry. A quick one. Just a thought. Can I ask something quickly?" aria-label="Play audio for synonyms">🔊</button>
+                        </h3>
+                        <ul class="list-disc list-inside entry-text pl-4">
+                            <li>Brief inquiry <span class="text-gray-400 text-xs">(Common Usage: ~50% - more formal)</span></li>
+                            <li class="synonym-highlight">A quick one <span class="text-gray-400 text-xs">(Common Usage: ~70% - informal, often used in response to "Do you have a moment?")</span></li>
+                            <li>Just a thought <span class="text-gray-400 text-xs">(Common Usage: ~40% - implies a suggestion or minor point)</span></li>
+                            <li class="synonym-highlight">Can I ask something quickly? <span class="text-gray-400 text-xs">(Common Usage: ~85% - very direct and common)</span></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Contextos de Uso:</h3>
+                        <div class="space-y-3 entry-text">
+                            <p>
+                                <span class="font-bold text-teal-300">Chat/Mensagens de Texto:</span> Extremamente comum para iniciar uma pergunta rápida sem parecer exigente.
+                                <br>Ex: "Quick question: Did you send that email?"
+                            </p>
+                            <p>
+                                <span class="font-bold text-teal-300">Email:</span> Perfeito para o início de e-mails quando você tem uma pergunta específica e concisa. Pode ser usado na linha de assunto ou no corpo.
+                                <br>Ex: "Subject: Quick question about the meeting"
+                                <br>Ex: "Hi [Name], Quick question: When is the deadline for this task?"
+                            </p>
+                            <p>
+                                <span class="font-bold text-teal-300">Reuniões/Encontros (Formais e Informais):</span> Usado para interrupções breves ou para pedir esclarecimentos de forma educada.
+                                <br>Ex: "Before we move on, I have a quick question about the budget."
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-4 border-t border-gray-700">
+                        <h3 class="entry-subtitle">Try it out! (Use the expression in English):</h3>
+                        <textarea class="interactive-box" id="en-box-3" placeholder="Write your sentence using 'Quick question' here..."></textarea>
+                        <button class="check-button" onclick="checkAnswer('en-box-3', 'feedback-en-3')">Check Answer</button>
+                        <div id="feedback-en-3" class="feedback-message"></div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Your Portuguese Equivalent (How you'd say it daily):</h3>
+                        <textarea class="interactive-box" id="pt-box-3" placeholder="Write your daily Portuguese equivalent here..."></textarea>
+                        <button class="check-button" onclick="checkAnswer('pt-box-3', 'feedback-pt-3')">Check Answer</button>
+                        <div id="feedback-pt-3" class="feedback-message"></div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Nova Seção: Expressão "What the heck" -->
+            <section class="entry-card">
+                <h2 class="entry-term text-neon-blue">
+                    (4) What the heck
+                    <button class="audio-button" data-text="What the heck" aria-label="Play audio for What the heck">🔊</button>
+                </h2>
+                <p class="entry-text text-gray-400 text-sm mb-4">
+                    <span class="font-bold">Common Usage:</span> Approximately 75% in informal and expressive contexts.
+                </p>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Explicação (English):
+                            <button class="audio-button" data-text="What the heck is an informal and milder exclamation of surprise, confusion, frustration, or sometimes even mild annoyance. It's a less offensive alternative to What the hell or What the f. It can also express a sense of why not or let's do it." aria-label="Play audio for English explanation">🔊</button>
+                        </h3>
+                        <p class="entry-text text-gray-300">
+                            "What the heck" is an informal and milder exclamation of surprise, confusion, frustration, or sometimes even mild annoyance. It's a less offensive alternative to "What the hell" or "What the f***." It can also express a sense of "why not" or "let's do it."
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Explicação (Português):</h3>
+                        <p class="entry-text text-gray-200">
+                            "What the heck" é uma exclamação informal e mais branda de surpresa, confusão, frustração ou, às vezes, até mesmo um leve aborrecimento. É uma alternativa menos ofensiva para "What the hell" ou "What the f***." Também pode expressar um sentido de "por que não" ou "vamos fazer isso".
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Equivalente em Português (como um brasileiro falaria):</h3>
+                        <ul class="list-disc list-inside entry-text pl-4">
+                            <li>"O que é isso?!" (surpresa/confusão)</li>
+                            <li>"Que diabos!" (frustração/aborrecimento)</li>
+                            <li>"Por que não?!" / "Dane-se!" (sentido de "vamos lá")</li>
+                            <li>"Que raios!"</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Situações Práticas (English):
+                            <button class="audio-button" data-text="Scenario 1: Seeing something unexpected: 'What the heck was that noise?' Scenario 2: Deciding to try something new: 'It's a bit risky, but what the heck, let's go for it!'" aria-label="Play audio for English practical situations">🔊</button>
+                        </h3>
+                        <div class="space-y-2 entry-text">
+                            <p><strong>Scenario 1:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Seeing something unexpected: '<span class="text-teal-300 font-semibold">What the heck</span> was that noise?'"
+                            </p>
+                            <p><strong>Scenario 2:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Deciding to try something new: 'It's a bit risky, but <span class="text-teal-300 font-semibold">what the heck</span>, let's go for it!'"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Mesmas Situações (Português com Expressão em Inglês):</h3>
+                        <div class="space-y-2 entry-text">
+                            <p><strong>Scenario 1 (Surpresa/Confusão):</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Vendo algo inesperado: '<span class="text-teal-300 font-semibold">What the heck</span> foi aquele barulho?'"
+                            </p>
+                            <p><strong>Scenario 2 (Decisão/Por que não):</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Decidindo tentar algo novo: 'É um pouco arriscado, mas <span class="text-teal-300 font-semibold">what the heck</span>, vamos nessa!'"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">My tips to you:</h3>
+                        <p class="entry-text">
+                            <span class="font-bold text-teal-300">Associação:</span> Pense em "heck" como uma versão mais "suave" de palavras mais fortes. É uma forma de expressar emoção sem ser excessivamente vulgar.
+                        </p>
+                        <p class="entry-text mt-2">
+                            <span class="font-bold text-teal-300">Dica:</span> O tom de voz é crucial com "what the heck". Pode variar de surpresa genuína a frustração leve ou até mesmo um encorajamento despreocupado. Pratique diferentes entonações!
+                        </p>
+                        <p class="entry-text mt-2">
+                            <span class="font-bold text-teal-300">
+                                Advanced Tip (English):
+                                <button class="audio-button" data-text="While what the heck is generally mild, be mindful of its usage in very formal or conservative environments. In such cases, opt for more neutral expressions like What was that? or I'm surprised." aria-label="Play audio for advanced tip">🔊</button>
+                            </span>
+                            While "what the heck" is generally mild, be mindful of its usage in very formal or conservative environments. In such cases, opt for more neutral expressions like "What was that?" or "I'm surprised."
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Sinônimos / Synonyms:
+                            <button class="audio-button" data-text="What the...? What on earth? What in the world? For goodness sake! Why not? Go for it!" aria-label="Play audio for synonyms">🔊</button>
+                        </h3>
+                        <ul class="list-disc list-inside entry-text pl-4">
+                            <li class="synonym-highlight">What the...? <span class="text-gray-400 text-xs">(Common Usage: ~80% - very versatile, implies unfinished thought)</span></li>
+                            <li>What on earth? <span class="text-gray-400 text-xs">(Common Usage: ~65% - expresses more genuine bewilderment)</span></li>
+                            <li>What in the world? <span class="text-gray-400 text-xs">(Common Usage: ~60% - similar to "on earth")</span></li>
+                            <li>For goodness sake! <span class="text-gray-400 text-xs">(Common Usage: ~45% - expresses exasperation or mild frustration)</span></li>
+                            <li class="synonym-highlight">Why not? <span class="text-gray-400 text-xs">(Common Usage: ~90% - when used in the "let's do it" context)</span></li>
+                            <li class="synonym-highlight">Go for it! <span class="text-gray-400 text-xs">(Common Usage: ~85% - when encouraging action)</span></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Contextos de Uso:</h3>
+                        <div class="space-y-3 entry-text">
+                            <p>
+                                <span class="font-bold text-teal-300">Chat/Mensagens de Texto:</span> Comum para expressar surpresa ou uma decisão impulsiva de forma rápida.
+                                <br>Ex: "Just saw a cat wearing a hat. What the heck?!"
+                                <br>Ex: "The movie starts in 5 minutes. What the heck, let's go!"
+                            </p>
+                            <p>
+                                <span class="font-bold text-teal-300">Email:</span> Geralmente evitado em e-mails profissionais. Aceitável em e-mails muito informais para amigos próximos, especialmente se o tone for brincalhão.
+                                <br>Ex: (Para um amigo) "What the heck happened with that project? I heard it got cancelled."
+                            </p>
+                            <p>
+                                <span class="font-bold text-teal-300">Reuniões/Encontros (Informais):</span> Pode ser usado em conversas casuais para expressar surpresa ou para concordar com uma ideia de forma descontraída.
+                                <br>Ex: (Em uma reunião de brainstorming) "That idea sounds crazy, but what the heck, let's explore it!"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-4 border-t border-gray-700">
+                        <h3 class="entry-subtitle">Try it out! (Use the expression in English):</h3>
+                        <textarea class="interactive-box" id="en-box-4" placeholder="Write your sentence using 'What the heck' here..."></textarea>
+                        <button class="check-button" onclick="checkAnswer('en-box-4', 'feedback-en-4')">Check Answer</button>
+                        <div id="feedback-en-4" class="feedback-message"></div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Your Portuguese Equivalent (How you'd say it daily):</h3>
+                        <textarea class="interactive-box" id="pt-box-4" placeholder="Write your daily Portuguese equivalent here..."></textarea>
+                        <button class="check-button" onclick="checkAnswer('pt-box-4', 'feedback-pt-4')">Check Answer</button>
+                        <div id="feedback-pt-4" class="feedback-message"></div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Nova Seção: Expressão "Possessive 's Place (mother's place, my place, etc.)" -->
+            <section class="entry-card">
+                <h2 class="entry-term text-neon-blue">
+                    (5) Possessive 's Place (mother's place, my place, etc.)
+                    <button class="audio-button" data-text="Possessive S Place, like mother's place, my place, etcetera." aria-label="Play audio for Possessive 's Place">🔊</button>
+                </h2>
+                <p class="entry-text text-gray-400 text-sm mb-4">
+                    <span class="font-bold">Common Usage:</span> Approximately 95% in informal to semi-formal contexts. Very common.
+                </p>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Explicação (English):
+                            <button class="audio-button" data-text="The possessive apostrophe S followed by place is a very common and convenient way in English to refer to someone's home or residence without explicitly saying house or apartment. It implies the place where person lives. This construction can be used with proper nouns, for example, John's place, common nouns, for example, my mother's place, or pronouns, for example, my place." aria-label="Play audio for English explanation">🔊</button>
+                        </h3>
+                        <p class="entry-text text-gray-300">
+                            The possessive `'s` (apostrophe S) followed by "place" is a very common and convenient way in English to refer to someone's home or residence without explicitly saying "house" or "apartment." It implies "the place where [person] lives." This construction can be used with proper nouns (e.g., John's place), common nouns (e.g., my mother's place), or pronouns (e.g., my place).
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Explicação (Português):</h3>
+                        <p class="entry-text text-gray-200">
+                            O possessivo `'s` (apóstrofo S) seguido de "place" é uma forma muito comum e conveniente em inglês para se referir à casa ou residência de alguém sem dizer explicitamente "casa" ou "apartamento". Implica "o lugar onde [a pessoa] mora". Essa construção pode ser usada com nomes próprios (ex: John's place), substantivos comuns (ex: my mother's place) ou pronomes (ex: my place).
+                            <br><br>
+                            Para falantes de português, é importante entender que "place" aqui não se refere a "um lugar" genérico como em "um bom lugar para comer", mas sim à residência da pessoa. É uma contração natural na fala inglesa.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Equivalente em Português (como um brasileiro falaria):</h3>
+                        <ul class="list-disc list-inside entry-text pl-4">
+                            <li>"Na casa da minha mãe." (para "my mother's place")</li>
+                            <li>"Na minha casa." (para "my place")</li>
+                            <li>"Na casa do meu chefe." (para "my boss' place")</li>
+                            <li>"Na casa da minha namorada." (para "my girlfriend's place")</li>
+                            <li>"Lá na casa do [Nome]."</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Situações Práticas (English):
+                            <button class="audio-button" data-text="Scenario 1: Friend: 'Where are we meeting tonight?' You: 'Let's just go to my place, it's closer.' Scenario 2: Discussing weekend plans: 'I'm thinking of visiting my mother's place this weekend, she lives out of town.' Scenario 3: Colleague: 'Did you leave the documents at the office?' You: 'No, I accidentally took them home. They're at my place.'" aria-label="Play audio for English practical situations">🔊</button>
+                        </h3>
+                        <div class="space-y-2 entry-text">
+                            <p><strong>Scenario 1:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Friend: 'Where are we meeting tonight?' You: 'Let's just go to <span class="text-teal-300 font-semibold">my place</span>, it's closer.'"
+                            </p>
+                            <p><strong>Scenario 2:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Discussing weekend plans: 'I'm thinking of visiting <span class="text-teal-300 font-semibold">my mother's place</span> this weekend, she lives out of town.'"
+                            </p>
+                            <p><strong>Scenario 3:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Colleague: 'Did you leave the documents at the office?' You: 'No, I accidentally took them home. They're at <span class="text-teal-300 font-semibold">my place</span>.'"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Mesmas Situações (Português com Expressão em Inglês):</h3>
+                        <div class="space-y-2 entry-text">
+                            <p><strong>Scenario 1:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Amigo: 'Onde vamos nos encontrar hoje à noite?' Você: 'Vamos para <span class="text-teal-300 font-semibold">my place</span>, é mais perto.'"
+                            </p>
+                            <p><strong>Scenario 2:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Discutindo planos para o fim de semana: 'Estou pensando em visitar <span class="text-teal-300 font-semibold">my mother's place</span> neste fim de semana, ela mora fora da cidade.'"
+                            </p>
+                            <p><strong>Scenario 3:</strong></p>
+                            <p class="bg-gray-800 p-3 rounded-md border border-gray-700">
+                                "Colega: 'Você deixou os documentos no escritório?' Você: 'Não, eu acidentalmente os levei para casa. Eles estão em <span class="text-teal-300 font-semibold">my place</span>.'"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">My tips to you:</h3>
+                        <p class="entry-text">
+                            <span class="font-bold text-teal-300">Associação:</span> Pense no `'s place` como uma forma "curta e doce" de dizer "na casa de alguém". É como se o `'s` já implicasse "casa" ou "residência".
+                        </p>
+                        <p class="entry-text mt-2">
+                            <span class="font-bold text-teal-300">Dica:</span> Esta construção é extremamente natural e comum na fala diária em inglês. Usá-la fará com que seu inglês soe muito mais fluente e nativo. Não tenha medo de usá-la em contextos informais e semi-formais.
+                        </p>
+                        <p class="entry-text mt-2">
+                            <span class="font-bold text-teal-300">
+                                Advanced Tip (English):
+                                <button class="audio-button" data-text="While at my place is common, at the place is generally incorrect unless referring to a specific, previously mentioned location that isn't a person's home. Always ensure the possessive is clear. Also, for businesses, you'd typically say at the office or at the store, not at the boss's place unless you mean their home." aria-label="Play audio for advanced tip">🔊</button>
+                            </span>
+                            While "at my place" is common, "at *the* place" is generally incorrect unless referring to a specific, previously mentioned location that isn't a person's home. Always ensure the possessive is clear. Also, for businesses, you'd typically say "at the office" or "at the store," not "at the boss's place" unless you mean their home.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">
+                            Sinônimos / Synonyms:
+                            <button class="audio-button" data-text="At my house/apartment. At their home. At [Name]'s house. Over at [person]'s." aria-label="Play audio for synonyms">🔊</button>
+                        </h3>
+                        <ul class="list-disc list-inside entry-text pl-4">
+                            <li class="synonym-highlight">At my house/apartment <span class="text-gray-400 text-xs">(Common Usage: ~90% - direct, clear)</span></li>
+                            <li class="synonym-highlight">At their home <span class="text-gray-400 text-xs">(Common Usage: ~80% - general, polite)</span></li>
+                            <li>At [Name]'s house <span class="text-gray-400 text-xs">(Common Usage: ~70% - specific, common)</span></li>
+                            <li>Over at [person]'s <span class="text-gray-400 text-xs">(Common Usage: ~60% - informal, implies visiting)</span></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="entry-subtitle">Contextos de Uso:</h3>
+                        <div class="space-y-3 entry-text">
+                            <p>
+                                <span class="font-bold text-teal-300">Chat/Mensagens de Texto:</span> Muito comum e eficiente para combinar encontros ou informar sua localização.
+                                <br>Ex: "Let's meet at my place around 7."
+                            </p>
+                            <p>
+                                <span class="font-bold text-teal-300">Email:</span> Aceitável em e-mails informais para amigos, familiares ou colegas próximos. Em e-mails mais formais, use "at my residence" ou "at my home address".
+                                <br>Ex: "Hi [Name], Can you drop off the keys at my place later?"
+                            </p>
+                            <p>
+                                <span class="font-bold text-teal-300">Reuniões/Encontros (Informais):</span> Perfeito para conversas casuais ao discutir planos ou onde algo está localizado.
+                                <br>Ex: "We can have the study group at John's place this week."
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-4 border-t border-gray-700">
+                        <h3 class="entry-subtitle">Try it out! (Use the express
